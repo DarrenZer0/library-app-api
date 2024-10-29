@@ -35,7 +35,6 @@ class AuthController extends Controller
     $input['password'] = bcrypt($input['password']);
     $user = User::create($input);
     
-    $success['token'] = $user->createToken('auth_token')->plainTextToken;
     $success['name'] = $user->name;
 
     return response()->json([
@@ -84,5 +83,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
+
+        return response()->json(['message' => 'Successfully Logged Out.']);
     }
 }

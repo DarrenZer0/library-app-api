@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Book;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
@@ -28,6 +29,8 @@ class BookController extends Controller
             'author' => 'required|string|max:255',
             'description' => 'required|string|max:255',
             'quantity' => 'required|integer|max:255',
+            'category' => 'required|integer|exists:categories,id',
+            'book_img' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         if($validator->fails())
@@ -41,21 +44,30 @@ class BookController extends Controller
         }
         else
         {
-        $book = new Book;
-        $book->title=$request->title;
-        $book->author_name=$request->author;
-        $book->quantity=$request->quantity;
-        $book->description=$request->description;
+            if ($request->hasFile('book_img')) 
+            {
+                $book_img = time() . '.' . $request->book_img->extension();
+                $request->book_img->move(public_path('img'), $book_img);
 
-        $book->save();
+                $book = new Book;
+                $book->title=$request->title;
+                $book->author=$request->author;
+                $book->description=$request->description;
+                $book->quantity=$request->quantity;
+                $book->category_id=$request->category;
+                $book->book_img=$book_img;
 
-        $data = 
-        [
-            'status' => 200,
-            'message' => 'Book Added Successfully'
-        ];
-        return response()->json($data, 200);
+                $book->save();
 
+                $data = 
+                [
+                    'status' => 200,
+                    'message' => 'Book Added Successfully'
+                ];
+
+                return response()->json($data, 200);
+
+            }
         }
     }
 
@@ -66,6 +78,8 @@ class BookController extends Controller
             'author' => 'required|string|max:255',
             'description' => 'required|string|max:255',
             'quantity' => 'required|integer|max:255',
+            'category' => 'required|integer|exists:categories,category',
+            'book_img' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         if($validator->fails())
@@ -81,9 +95,11 @@ class BookController extends Controller
         {
         $book = Book::find($id);
         $book->title=$request->title;
-        $book->author_name=$request->author;
-        $book->quantity=$request->quantity;
+        $book->author=$request->author;
         $book->description=$request->description;
+        $book->quantity=$request->quantity;
+        $book->category_id=$request->category;
+        $book->book_img=$book_img;
 
         $book->save();
 
