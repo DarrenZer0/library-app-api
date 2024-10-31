@@ -26,14 +26,18 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanc
 
 Route::get('books', [BookController::class, 'index']);
 
+
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::post('books', [BookController::class, 'add_books']);
     Route::put('books/edit/{id}', [BookController::class, 'edit']);
     Route::delete('books/edit/{id}', [BookController::class, 'delete']);
+    Route::get('books/records', [BorrowController::class, 'index']);
+    Route::put('borrows/{userId}/{borrowId}/status', [BorrowController::class, 'updateStatus']);
 });
 
 Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
     Route::post('books/borrow/{id}', [BorrowController::class, 'borrow']);
+    Route::get('books/user_records', [BorrowController::class, 'user_index']);
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

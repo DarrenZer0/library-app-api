@@ -25,6 +25,12 @@ class RoleMiddleware
             return $next($request);
         }
 
+        Log::info('Role Middleware Unauthorized', [
+            'user_id' => $request->user() ? $request->user()->id : 'No User',
+            'role' => $request->user() ? $request->user()->role : 'No Role',
+            'required_role' => $role,
+        ]);
+
         // If the role does not match, return unauthorized response
         return response()->json(['message' => 'Unauthorized'], 403);
     }
