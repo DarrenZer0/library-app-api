@@ -15,10 +15,10 @@ return new class extends Migration
     {
         Schema::create('borrows', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('book_id')->constrained();
-            $table->foreignId('user_id')->constrained();
+            $table->foreignId('book_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->dateTime('borrowed_at')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->timestamp('due_date');
+            $table->timestamp('due_date')->nullable();
             $table->dateTime('returned_at')->nullable();
             $table->string('status')->default('Applied');
             $table->timestamps();

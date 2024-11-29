@@ -28,10 +28,10 @@ Route::get('books', [BookController::class, 'index']);
 
 
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
-    Route::post('books', [BookController::class, 'add_books']);
-    Route::put('books/edit/{id}', [BookController::class, 'edit']);
-    Route::delete('books/edit/{id}', [BookController::class, 'delete']);
     Route::get('books/records', [BorrowController::class, 'index']);
+    Route::post('books', [BookController::class, 'add_books']);
+    Route::put('books/update/{id}', [BookController::class, 'edit']);
+    Route::delete('books/delete/{id}', [BookController::class, 'delete']);
     Route::put('borrows/{userId}/{borrowId}/status', [BorrowController::class, 'updateStatus']);
 });
 

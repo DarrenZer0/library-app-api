@@ -14,9 +14,9 @@ class BorrowController extends Controller
 
     public function index()
     {
-        $borrowRecords = Borrow::all(); // Fetch all borrow records
+        $borrowRecords = Borrow::all(); 
     
-        Log::info('Fetched borrow records:', ['records' => $borrowRecords]); // Log records for debugging
+        Log::info('Fetched borrow records:', ['records' => $borrowRecords]);
 
         return response()->json($borrowRecords);
     }
@@ -29,8 +29,6 @@ class BorrowController extends Controller
 
         return response()->json($borrowRecords);
     }
-
-    
     
     public function borrow(Request $request, $id)
     {
@@ -55,7 +53,7 @@ class BorrowController extends Controller
             $borrow->book_id = $id;
             $borrow->user_id = $user_id;
             $borrow->borrowed_at = now();
-            $borrow->due_date = Carbon::now()->addDays(6);
+            $borrow->due_date = null;
             $borrow->status = 'Applied';
             $borrow->save();
             
@@ -75,7 +73,7 @@ class BorrowController extends Controller
     
     // Validate the status input
         $request->validate([
-            'status' => 'required|in:Approved,Rejected'
+            'status' => 'required|in:Approved,Rejected,Returned'
         ]);
     
     // Find the borrow record
@@ -86,6 +84,27 @@ class BorrowController extends Controller
     
     // Update the status
         $borrow->status = $request->status;
+
+        if ($request->status === 'Approved') {
+            $borrow->due_date = now()->addDays(6);
+
+            $book = Book::find($borrow->book_id);
+            if ($book && $book->quantity > 0) {
+                $book->quantity -= 1;
+                $book->save();
+            } else {
+                $borrow->status === 'Rejected';
+                $borrow->due_date = null;
+                return response()->json(['message' => 'Book quantity insufficient.'], 400);
+            }
+
+        } else if ($request->status === 'Rejected'){
+            $borrow->due_date = null;
+        } else if ($request->status === 'Returned') {
+            $borrow->status = 'Returned';
+            $borrow->returned_at = now();
+        }
+
         $borrow->save();
     
         return response()->json(['message' => 'Status updated successfully.', 'data' => $borrow]);

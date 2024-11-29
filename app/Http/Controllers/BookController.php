@@ -93,22 +93,27 @@ class BookController extends Controller
         }
         else
         {
-        $book = Book::find($id);
-        $book->title=$request->title;
-        $book->author=$request->author;
-        $book->description=$request->description;
-        $book->quantity=$request->quantity;
-        $book->category_id=$request->category;
-        $book->book_img=$book_img;
+            if ($request->hasFile('book_img')) 
+            {
+                $book_img = time() . '.' . $request->book_img->extension();
+                $request->book_img->move(public_path('img'), $book_img);
+                $book = Book::find($id);
+                $book->title=$request->title;
+                $book->author=$request->author;
+                $book->description=$request->description;
+                $book->quantity=$request->quantity;
+                $book->category_id=$request->category;
+                $book->book_img=$book_img;
 
-        $book->save();
+                $book->save();
 
-        $data = 
-        [
-            'status' => 200,
-            'message' => 'Book Updated Successfully'
-        ];
-        return response()->json($data, 200);
+                $data = 
+            [
+                    'status' => 200,
+                    'message' => 'Book Updated Successfully'
+            ];
+            return response()->json($data, 200);
+            }
         
         }
     }
